@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f5f7fb">
+  <title>Graph Studio — ارسم بياناتك</title>
+  <style>
+    :root{font-family:system-ui,-apple-system,"Segoe UI",Tahoma,sans-serif;color:#18243a;background:#f5f7fb;font-synthesis:none}
+    *{box-sizing:border-box}body{margin:0;min-height:100vh}
+    button,input,textarea,select{font:inherit}button{cursor:pointer}
+    .shell{max-width:1450px;margin:auto;padding:24px 30px 34px}
+    header{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:26px}
+    .identity{display:flex;align-items:center;gap:13px}
+    .mark{width:44px;height:44px;display:grid;place-items:center;background:#465cfa;color:white;border-radius:14px;font-weight:800;font-size:24px;box-shadow:0 8px 20px #465cfa25}
+    h1{margin:0;font-size:1.38rem;letter-spacing:-.5px}header p{color:#718099;font-size:.87rem;margin:3px 0 0}
+    .pill{font-size:.81rem;color:#4961d2;background:#e9edff;border:1px solid #dce3ff;border-radius:100px;padding:8px 12px}
+    .layout{display:grid;grid-template-columns:360px minmax(0,1fr);gap:22px;align-items:start;direction:ltr}
+    .sidebar,.workspace{direction:rtl}.sidebar{display:flex;flex-direction:column;gap:17px}
+    .panel,.workspace{background:white;border:1px solid #e9edf5;border-radius:18px;box-shadow:0 4px 20px #172a4809}
+    .panel{padding:19px 20px}.panel h2{margin:0 0 14px;font-size:1rem}
+    .panel-note{margin:-5px 0 14px;font-size:.77rem;color:#8793a5;line-height:1.7}
+    label{display:block;font-size:.81rem;font-weight:650;color:#4d5c74;margin:0 0 7px}
+    textarea,input[type=text],select{width:100%;border:1px solid #dfe5ef;border-radius:10px;background:#fff;color:#243148;outline:none;transition:border-color .15s,box-shadow .15s}
+    textarea:focus,input[type=text]:focus,select:focus{border-color:#7f8dff;box-shadow:0 0 0 3px #687bff1a}
+    textarea{height:76px;resize:vertical;padding:12px;line-height:1.6;direction:ltr;text-align:left;font-size:.92rem}
+    input[type=text],select{height:39px;padding:0 11px;font-size:.88rem}
+    select{cursor:pointer}input[type=color]{width:43px;height:37px;border:1px solid #dfe5ef;padding:4px;border-radius:9px;background:white;cursor:pointer}
+    input[type=range]{accent-color:#5266f4;width:100%}.field+.field{margin-top:13px}
+    .two{display:grid;grid-template-columns:1fr 1fr;gap:11px}.field{min-width:0}
+    .line{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:12px}.line>label{margin:0}.line .slider{flex:1;max-width:170px;display:flex;align-items:center;gap:7px;direction:ltr}
+    output{font-size:.78rem;font-weight:650;color:#69778e;min-width:18px;text-align:right}
+    .color-field{display:flex;gap:9px;align-items:center}.color-field label{margin:0;flex:1}
+    .check{display:flex;align-items:center;gap:8px;font-size:.84rem;color:#56647a;cursor:pointer;margin:12px 0 0}.check input{accent-color:#5167f6;width:16px;height:16px}
+    .workspace{min-height:680px;overflow:hidden;padding:24px;display:flex;flex-direction:column}
+    .workspace-head{display:flex;justify-content:space-between;align-items:center;gap:15px;flex-wrap:wrap;margin-bottom:16px}
+    .workspace-head h2{font-size:1.15rem;margin:0 0 4px}.workspace-head p{font-size:.8rem;margin:0;color:#8491a4}
+    .toolbar{display:flex;flex-wrap:wrap;gap:8px}
+    .btn{border:1px solid #dfe5ef;border-radius:10px;background:#fff;color:#3a4b66;font-weight:650;padding:10px 13px;font-size:.81rem;display:inline-flex;gap:7px;align-items:center;justify-content:center;white-space:nowrap;transition:transform .15s,background .15s}
+    .btn:hover{background:#f4f6ff;transform:translateY(-1px)}.btn:active{transform:translateY(0)}
+    .btn.primary{background:#4d63f5;color:#fff;border-color:#4d63f5}.btn.primary:hover{background:#394fe5}
+    .chart-area{border:1px solid #edf0f7;border-radius:15px;background:#fff;overflow:hidden;flex:1;display:flex;align-items:center;min-height:490px}
+    svg{width:100%;height:auto;max-height:600px;display:block}
+    .workspace-foot{margin-top:16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;color:#7f8da1;font-size:.8rem}
+    .status{display:flex;align-items:center;gap:7px}.dot{width:8px;height:8px;border-radius:50%;background:#38b686}
+    .error{color:#c03e56}.error .dot{background:#d44864}.hint{color:#95a0b1}
+    .footer{padding-top:19px;text-align:center;color:#9ba6b6;font-size:.75rem}
+    @media(max-width:1050px){.layout{grid-template-columns:300px minmax(0,1fr)}.shell{padding:19px 18px}.workspace{padding:18px}}
+    @media(max-width:850px){.layout{display:flex;flex-direction:column-reverse}.sidebar,.workspace{width:100%}.sidebar{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}.workspace{min-height:0}.chart-area{min-height:300px}header{margin-bottom:17px}}
+    @media(max-width:590px){.shell{padding:14px}.sidebar{display:flex}.workspace{padding:14px}.workspace-head{align-items:flex-start}.workspace-head .toolbar{width:100%}.btn{flex:1}.pill{display:none}.panel{padding:17px}.chart-area{min-height:240px}.workspace-foot{line-height:1.6}}
+  </style>
+</head>
+<body>
+<div class="shell">
+  <header>
+    <div class="identity"><div class="mark" aria-hidden="true">↗</div><div><h1>Graph Studio</h1><p>من أرقام بسيطة إلى رسم جاهز للمشاركة</p></div></div>
+    <span class="pill">بدون تسجيل · يعمل دون إنترنت</span>
+  </header>
+  <div class="layout">
+    <aside class="sidebar" aria-label="إعدادات الرسم البياني">
+      <section class="panel">
+        <h2>01 / أدخل بياناتك</h2>
+        <p class="panel-note">اكتب قيمًا رقمية مفصولة بفاصلة أو مسافة أو سطر جديد. لازم يكون عدد X وY متساويًا.</p>
+        <div class="field"><label for="x-values">قيم X</label><textarea id="x-values" spellcheck="false" placeholder="0, 1, 2, 3, 4">0, 1, 2, 3, 4, 5, 6</textarea></div>
+        <div class="field"><label for="y-values">قيم Y</label><textarea id="y-values" spellcheck="false" placeholder="2, 4, 3, 6, 5">2, 4, 3, 6, 5, 8, 7</textarea></div>
+        <button class="btn" type="button" id="sample" style="margin-top:13px;width:100%">↻ &nbsp; استعادة المثال</button>
+      </section>
+      <section class="panel">
+        <h2>02 / شكل الرسم</h2>
+        <div class="two">
+          <div class="field"><label for="chart-type">نوع الرسم</label><select id="chart-type"><option value="both">خط ونقاط</option><option value="line">خط فقط</option><option value="scatter">نقاط فقط</option></select></div>
+          <div class="field"><label for="point-shape">شكل النقاط</label><select id="point-shape"><option value="circle">دائرة</option><option value="square">مربع</option><option value="diamond">معيّن</option><option value="triangle">مثلث</option><option value="cross">علامة ×</option></select></div>
+        </div>
+        <div class="two" style="margin-top:14px">
+          <div class="field"><label for="line-style">نمط الخط</label><select id="line-style"><option value="solid">متصل</option><option value="dashed">متقطع</option><option value="dotted">منقط</option></select></div>
+          <div class="field"><label for="line-color">لون الخط</label><div class="color-field"><input id="line-color" type="color" value="#5267f5" aria-label="لون الخط"><span style="font-size:.78rem;color:#8390a4">اختر اللون</span></div></div>
+        </div>
+        <div class="line"><label for="line-width">سماكة الخط</label><div class="slider"><input id="line-width" type="range" min="1" max="9" step="1" value="3"><output id="line-width-value">3</output></div></div>
+        <div class="line"><label for="point-size">حجم النقاط</label><div class="slider"><input id="point-size" type="range" min="2" max="14" step="1" value="6"><output id="point-size-value">6</output></div></div>
+        <div class="line"><label for="point-color">لون النقاط</label><input id="point-color" type="color" value="#5267f5" aria-label="لون النقاط"></div>
+        <label class="check"><input type="checkbox" id="show-grid" checked> إظهار خطوط الشبكة</label>
+      </section>
+      <section class="panel">
+        <h2>03 / العناوين</h2>
+        <div class="field"><label for="chart-title">عنوان الرسم</label><input id="chart-title" type="text" value="نمو البيانات" maxlength="100" placeholder="عنوان اختياري"></div>
+        <div class="two" style="margin-top:13px"><div class="field"><label for="x-title">المحور X</label><input id="x-title" type="text" value="X" maxlength="60"></div><div class="field"><label for="y-title">المحور Y</label><input id="y-title" type="text" value="Y" maxlength="60"></div></div>
+      </section>
+    </aside>
+    <main class="workspace">
+      <div class="workspace-head"><div><h2>معاينة الرسم البياني</h2><p>أي تغيير تسويه ينعكس على الرسم مباشرة</p></div><div class="toolbar"><button class="btn primary" id="png" type="button">↓ PNG</button><button class="btn" id="svg-download" type="button">↓ SVG</button><button class="btn" id="csv-download" type="button">↓ CSV</button><button class="btn" id="json-download" type="button">↓ JSON</button></div></div>
+      <div class="chart-area"><svg xmlns="http://www.w3.org/2000/svg" id="plot" viewBox="0 0 920 550" role="img" aria-label="معاينة الرسم البياني"></svg></div>
+      <div class="workspace-foot"><div id="status" class="status" role="status" aria-live="polite"><span class="dot"></span><span id="status-text">7 نقاط جاهزة</span></div><div class="hint">التصدير يحفظ بياناتك محليًا على جهازك</div></div>
+    </main>
+  </div>
+  <div class="footer">Graph Studio · موقع مستقل، لا يرسل بياناتك لأي خادم</div>
+</div>
+<script>
+(() => {
+  'use strict';
+  const ns = 'http://www.w3.org/2000/svg';
+  const $ = id => document.getElementById(id);
+  const ids = ['x-values','y-values','chart-type','point-shape','line-style','line-color','line-width','point-size','point-color','show-grid','chart-title','x-title','y-title'];
+  const svg = $('plot');
+  let currentPairs = [];
+  let valid = true;
+  const defaultValues = { 'x-values':'0, 1, 2, 3, 4, 5, 6', 'y-values':'2, 4, 3, 6, 5, 8, 7', 'chart-type':'both','point-shape':'circle','line-style':'solid','line-color':'#5267f5','line-width':'3','point-size':'6','point-color':'#5267f5','show-grid':true,'chart-title':'نمو البيانات','x-title':'X','y-title':'Y' };
+  function getSettings(){ return Object.fromEntries(ids.map(id => [id, $(id).type === 'checkbox' ? $(id).checked : $(id).value])); }
+  function restore(s){ ids.forEach(id => { if (s[id] === undefined) return; if ($(id).type === 'checkbox') $(id).checked = Boolean(s[id]); else $(id).value = s[id]; }); }
+  function save(){try{localStorage.setItem('graph-studio-v1',JSON.stringify(getSettings()));}catch{}}
+  try { const saved=JSON.parse(localStorage.getItem('graph-studio-v1')); if(saved && typeof saved === 'object') restore(saved); }catch{}
+  function parseValues(value,name){
+    const parts = value.trim().split(/[\s,;]+/).filter(Boolean);
+    if(!parts.length) throw Error('أدخل قيمة واحدة على الأقل في '+name);
+    const nums=parts.map(t=>Number(t));
+    if(nums.some(n => !Number.isFinite(n))) throw Error('تأكد أن جميع قيم '+name+' أرقام صحيحة (مثل 2.5 أو -3)');
+    if(nums.length>500) throw Error('الحد الأقصى 500 نقطة للحفاظ على سرعة الرسم');
+    return nums;
+  }
+  function pairs(){
+    const x=parseValues($('x-values').value,'X'), y=parseValues($('y-values').value,'Y');
+    if(x.length!==y.length) throw Error('عدد قيم X ('+x.length+') لازم يساوي عدد قيم Y ('+y.length+')');
+    return x.map((v,i)=>({x:v,y:y[i]}));
+  }
+  function el(tag,attrs={},value){
+    const e=document.createElementNS(ns,tag);
+    for(const [k,v] of Object.entries(attrs)) e.setAttribute(k,String(v));
+    if(value!==undefined)e.textContent=String(value);
+    svg.appendChild(e);return e;
+  }
+  function fmt(n){if(!Number.isFinite(n))return '';if(Math.abs(n)>=1e7 || (Math.abs(n)<.0001 && n!==0))return n.toExponential(1);return Number(n.toPrecision(7)).toLocaleString('en-US',{maximumFractionDigits:6});}
+  function scale(min,max){
+    if(min===max){const d=Math.abs(min)*.2||1;min-=d;max+=d;}
+    const r=max-min, raw=r/5, exponent=Math.pow(10,Math.floor(Math.log10(raw)));
+    const fraction=raw/exponent;
+    const nice=fraction<=1?1:fraction<=2?2:fraction<=2.5?2.5:fraction<=5?5:10;
+    const step=nice*exponent;
+    let lo=Math.floor(min/step)*step, hi=Math.ceil(max/step)*step;
+    if(lo===hi)hi=lo+step;
+    return {lo,hi,step};
+  }
+  function pointShape(x,y,size,kind,color){
+    const common={fill:color,stroke:color,'stroke-width':'1.7'};
+    if(kind==='circle') return el('circle',{cx:x,cy:y,r:size,...common});
+    if(kind==='square') return el('rect',{x:x-size,y:y-size,width:size*2,height:size*2,rx:1.2,...common});
+    if(kind==='diamond')return el('polygon',{points:`${x},${y-size*1.35} ${x+size*1.35},${y} ${x},${y+size*1.35} ${x-size*1.35},${y}`,...common});
+    if(kind==='triangle')return el('polygon',{points:`${x},${y-size*1.4} ${x+size*1.3},${y+size} ${x-size*1.3},${y+size}`,...common});
+    return el('path',{d:`M ${x-size} ${y-size} L ${x+size} ${y+size} M ${x+size} ${y-size} L ${x-size} ${y+size}`,fill:'none',stroke:color,'stroke-width':Math.max(2,size/2.7),'stroke-linecap':'round'});
+  }
+  function render(){
+    $('line-width-value').textContent=$('line-width').value;
+    $('point-size-value').textContent=$('point-size').value;
+    let data;
+    try {data=pairs();valid=true;currentPairs=data;$('status').classList.remove('error');$('status-text').textContent=data.length+' '+(data.length===1?'نقطة':'نقاط')+' جاهزة';}
+    catch(e){valid=false;$('status').classList.add('error');$('status-text').textContent=e.message;return;}
+    save();
+    svg.replaceChildren();
+    const W=920,H=550,L=99,R=45,T=85,B=90,pW=W-L-R,pH=H-T-B;
+    const xs=scale(Math.min(...data.map(d=>d.x)),Math.max(...data.map(d=>d.x)));
+    const ys=scale(Math.min(...data.map(d=>d.y)),Math.max(...data.map(d=>d.y)));
+    const xx=v=>L+(v-xs.lo)/(xs.hi-xs.lo)*pW;
+    const yy=v=>T+pH-(v-ys.lo)/(ys.hi-ys.lo)*pH;
+    const textColor='#64748b',axisColor='#bcc6d7', gridColor='#e9eef6';
+    el('rect',{width:W,height:H,fill:'#ffffff'});
+    const title=$('chart-title').value.trim(), xtitle=$('x-title').value.trim(),ytitle=$('y-title').value.trim();
+    if(title) el('text',{x:W/2,y:39,'text-anchor':'middle','font-size':21,'font-weight':700,'font-family':'Arial, sans-serif',fill:'#26344a',direction:'rtl'},title);
+    const drawGrid=$('show-grid').checked;
+    for(let i=0;i<=Math.ceil((xs.hi-xs.lo)/xs.step+.000001);i++){
+      const v=xs.lo+i*xs.step;if(v>xs.hi+xs.step*.0001)break;const x=xx(v);
+      if(drawGrid)el('line',{x1:x,y1:T,x2:x,y2:T+pH,stroke:gridColor,'stroke-width':1});
+      el('line',{x1:x,y1:T+pH,x2:x,y2:T+pH+5,stroke:axisColor,'stroke-width':1});
+      el('text',{x,y:T+pH+24,'text-anchor':'middle','font-size':12,'font-family':'Arial, sans-serif',fill:textColor},fmt(v));
+    }
+    for(let i=0;i<=Math.ceil((ys.hi-ys.lo)/ys.step+.000001);i++){
+      const v=ys.lo+i*ys.step;if(v>ys.hi+ys.step*.0001)break;const y=yy(v);
+      if(drawGrid)el('line',{x1:L,y1:y,x2:L+pW,y2:y,stroke:gridColor,'stroke-width':1});
+      el('line',{x1:L-5,y1:y,x2:L,y2:y,stroke:axisColor,'stroke-width':1});
+      el('text',{x:L-13,y:y+4,'text-anchor':'end','font-size':12,'font-family':'Arial, sans-serif',fill:textColor},fmt(v));
+    }
+    el('path',{d:`M ${L} ${T} V ${T+pH} H ${L+pW}`,stroke:axisColor,'stroke-width':1.5,fill:'none'});
+    if(xtitle)el('text',{x:L+pW/2,y:H-24,'text-anchor':'middle','font-size':14,'font-family':'Arial, sans-serif',fill:'#52627c',direction:'auto'},xtitle);
+    if(ytitle)el('text',{x:22,y:T+pH/2,transform:`rotate(-90 22 ${T+pH/2})`,'text-anchor':'middle','font-size':14,'font-family':'Arial, sans-serif',fill:'#52627c',direction:'auto'},ytitle);
+    const chartType=$('chart-type').value;
+    if(chartType!=='scatter' && data.length>1){
+      const d=data.map((p,i)=>(i?'L':'M')+' '+xx(p.x).toFixed(2)+' '+yy(p.y).toFixed(2)).join(' ');
+      const dash=$('line-style').value==='dashed'?'12 7':$('line-style').value==='dotted'?'2 7':'';
+      el('path',{d,fill:'none',stroke:$('line-color').value,'stroke-width':$('line-width').value,'stroke-linecap':'round','stroke-linejoin':'round',...(dash?{'stroke-dasharray':dash}:{})});
+    }
+    if(chartType!=='line')data.forEach(p=>pointShape(xx(p.x),yy(p.y),Number($('point-size').value),$('point-shape').value,$('point-color').value));
+  }
+  let queue;
+  ids.forEach(id=>{$(id).addEventListener('input',()=>{clearTimeout(queue);queue=setTimeout(render,45)});$(id).addEventListener('change',render)});
+  $('sample').addEventListener('click',()=>{restore(defaultValues);render()});
+  function filename(ext){return 'graph-studio-'+new Date().toISOString().slice(0,10)+'.'+ext;}
+  function download(blob,name){const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),15000);}
+  function ensureValid(){render();if(!valid){$('x-values').focus();return false;}return true;}
+  function svgText(){const copy=svg.cloneNode(true);copy.setAttribute('xmlns',ns);copy.setAttribute('width','920');copy.setAttribute('height','550');return new XMLSerializer().serializeToString(copy);}
+  $('svg-download').addEventListener('click',()=>{if(ensureValid())download(new Blob([svgText()],{type:'image/svg+xml;charset=utf-8'}),filename('svg'))});
+  $('png').addEventListener('click',()=>{
+    if(!ensureValid())return;
+    const blob=new Blob([svgText()],{type:'image/svg+xml;charset=utf-8'}),url=URL.createObjectURL(blob),img=new Image();
+    img.onload=()=>{try{const canvas=document.createElement('canvas');canvas.width=1840;canvas.height=1100;const ctx=canvas.getContext('2d');ctx.fillStyle='white';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.drawImage(img,0,0,canvas.width,canvas.height);canvas.toBlob(b=>{if(b)download(b,filename('png'));else alert('تعذر تصدير الصورة. جرّب SVG.');},'image/png');}catch{alert('تعذر تصدير الصورة. جرّب SVG.')}finally{URL.revokeObjectURL(url)}};
+    img.onerror=()=>{URL.revokeObjectURL(url);alert('تعذر تصدير PNG. جرّب SVG.')};img.src=url;
+  });
+  $('csv-download').addEventListener('click',()=>{if(!ensureValid())return;const content='X,Y\r\n'+currentPairs.map(p=>p.x+','+p.y).join('\r\n')+'\r\n';download(new Blob(['\ufeff'+content],{type:'text/csv;charset=utf-8'}),filename('csv'));});
+  $('json-download').addEventListener('click',()=>{if(!ensureValid())return;download(new Blob([JSON.stringify({data:currentPairs,settings:getSettings()},null,2)],{type:'application/json;charset=utf-8'}),filename('json'));});
+  render();
+})();
+</script>
+</body>
+</html>
